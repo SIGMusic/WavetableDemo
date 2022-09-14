@@ -45,9 +45,9 @@ public:
     {
         sample_rate_ = sampleRate;
         // Ratio of samples per table run to samples per second
-        float tableSizeOverSampleRate = (float) table_size_ / sample_rate_;
+        // TODO
         // Calculate number of steps to take through the table per sample
-        table_delta_ = frequency_ * tableSizeOverSampleRate;
+        // TODO
     }
 
     /**
@@ -59,6 +59,7 @@ public:
         bufferToFill.clearActiveBufferRegion();
         auto* buf0 = bufferToFill.buffer->getWritePointer(0);
 
+        // >>> Here's where the buffer is filled with samples <<<
         for (unsigned int idx = 0; idx < bufferToFill.numSamples; ++idx)
         {
             buf0[idx] = amplitude_ * getNextSample();
@@ -88,18 +89,15 @@ public:
         auto index0 = (unsigned int) current_index_;
         auto index1 = index0 + 1;
 
-        auto frac = current_index_ - (float) index0;
+        // Get error between truncated current current angle index and truncated index
 
-        auto* table = wavetable_.getReadPointer (0);
-        auto value0 = table[index0];
-        auto value1 = table[index1];
+        // Read the values in the table at current and next indices
 
-        auto currentSample = value0 + frac * (value1 - value0); // interpolate
+        // Interpolate between the current value and the next value in the table
 
-        if ((current_index_ += table_delta_) > (float) table_size_)
-          current_index_ -= (float) table_size_; // Wrap around the table
-
-        return currentSample;
+        // Wrap around back to the beginning of the table
+        
+        return 0.0;
     }
     
     /**
@@ -112,17 +110,7 @@ public:
         auto* samples = wavetable_.getWritePointer(0);
  
         // Fill with one period of sine
-        auto angleDelta = juce::MathConstants<double>::twoPi / (double) (table_size_ - 1);
-        auto currentAngle = 0.0;
- 
-        for (unsigned int i = 0; i < table_size_; ++i)
-        {
-            auto sample = std::sin(currentAngle);
-            samples[i] = (float) sample;
-            currentAngle += angleDelta;
-        }
-
-        samples[table_size_] = samples[0];
+        // TODO
     }
 
 private:
