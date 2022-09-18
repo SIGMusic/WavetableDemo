@@ -2,15 +2,14 @@
 
 #include <JuceHeader.h>
 
-#include "WavetableSynth.h"
+#include "SynthKeyboard.h"
 
 //==============================================================================
 /*
     This component lives inside our window, and this is where you should put all
     your controls and content.
 */
-class MainComponent  : public juce::AudioAppComponent,
-                       public juce::MidiKeyboardState::Listener
+class MainComponent  : public juce::AudioAppComponent
 {
 public:
     //==============================================================================
@@ -25,22 +24,11 @@ public:
     //==============================================================================
     void paint (juce::Graphics& g) override;
     void resized() override;
-
-    //==============================================================================
-    virtual void handleNoteOn(juce::MidiKeyboardState *source, int midiChannel, int midiNoteNumber, float velocity) override;
-    virtual void handleNoteOff(juce::MidiKeyboardState *source, int midiChannel, int midiNoteNumber, float velocity) override;
-
-    static constexpr inline float midiToFreq(juce::uint8 midi_note)
-    {
-        return 440.0 * std::powf(2.0, (midi_note - 69) / 12.0);
-    }
 private:
     //==============================================================================
-    WavetableSynth wavetable_synth_;
-    juce::MidiKeyboardState midi_keyboard_state_one_;
-    juce::MidiKeyboardState midi_keyboard_state_two_;
-    std::unique_ptr<juce::MidiKeyboardComponent> midi_keyboard_one_;
-    std::unique_ptr<juce::MidiKeyboardComponent> midi_keyboard_two_;
-
+    static const size_t kNumSynths = 5;
+    static const int kKeyboardHeight = 100; // pixels
+    juce::OwnedArray<SynthKeyboard> synths_;
+    juce::MixerAudioSource mixer_;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };

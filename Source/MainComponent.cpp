@@ -15,20 +15,18 @@ MainComponent::MainComponent()
         // Specify the number of input and output channels that we want to open
         setAudioChannels (2, 2);
     }
-    
- 
-    midi_keyboard_state_one_.addListener(this);
-    midi_keyboard_state_two_.addListener(this);
-    midi_keyboard_one_.reset(new juce::MidiKeyboardComponent(midi_keyboard_state_one_,
-                             juce::KeyboardComponentBase::Orientation::horizontalKeyboard));
-    midi_keyboard_two_.reset(new juce::MidiKeyboardComponent(midi_keyboard_state_two_,
-                             juce::KeyboardComponentBase::Orientation::horizontalKeyboard));
-    addAndMakeVisible(midi_keyboard_one_.get());
-    addAndMakeVisible(midi_keyboard_two_.get());
+
+    for (size_t synth_idx = 0; synth_idx < kNumSynths; ++synth_idx)
+    {
+        auto* new_keyboard = new SynthKeyboard();
+        addAndMakeVisible(new_keyboard);
+        mixer_.addInputSource(new_keyboard, false);
+        synths_.add(new_keyboard);
+    }
 
     // Make sure you set the size of the component after
     // you add any child components.
-    setSize (800, 300);
+    setSize (800, kNumSynths * kKeyboardHeight);
 }
 
 MainComponent::~MainComponent()
@@ -40,16 +38,17 @@ MainComponent::~MainComponent()
 //==============================================================================
 void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRate)
 {
-    wavetable_synth_.prepareToPlay(samplesPerBlockExpected, sampleRate);
+    mixer_.prepareToPlay(samplesPerBlockExpected, sampleRate);
 }
 
 void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& bufferToFill)
 {
-    wavetable_synth_.getNextAudioBlock(bufferToFill);
+    mixer_.getNextAudioBlock(bufferToFill);
 }
 
 void MainComponent::releaseResources()
 {
+    mixer_.releaseResources();
 }
 
 //==============================================================================
@@ -62,18 +61,8 @@ void MainComponent::paint (juce::Graphics& g)
 void MainComponent::resized()
 {
     auto local_bounds = getLocalBounds();
-    midi_keyboard_one_->setBounds(local_bounds.removeFromTop(100));
-    midi_keyboard_two_->setBounds(local_bounds.removeFromTop(100));
+    for (auto* keyboard : synths_)
+    {
+        keyboard->setBounds(local_bounds.removeFromTop(kKeyboardHeight));
+    }
 }
-
-void MainComponent::handleNoteOn(juce::MidiKeyboardState* source, int, int midiNoteNumber, float)
-{
-    wavetable_synth_.setFrequency(midiToFreq((juce::uint8) midiNoteNumber));
-    wavetable_synth_.setAmplitude(0.5);
-}
-
-void MainComponent::handleNoteOff(juce::MidiKeyboardState* source, int, int midiNoteNumber, float)
-{
-    wavetable_synth_.setAmplitude(0.0);
-}
-
