@@ -16,14 +16,19 @@ MainComponent::MainComponent()
         setAudioChannels (2, 2);
     }
     
-    
-    midi_keyboard_state_.addListener(this);
-    midi_keyboard_.reset(new juce::MidiKeyboardComponent(midi_keyboard_state_, juce::KeyboardComponentBase::Orientation::horizontalKeyboard));
-    addAndMakeVisible(midi_keyboard_.get());
+ 
+    midi_keyboard_state_one_.addListener(this);
+    midi_keyboard_state_two_.addListener(this);
+    midi_keyboard_one_.reset(new juce::MidiKeyboardComponent(midi_keyboard_state_one_,
+                             juce::KeyboardComponentBase::Orientation::horizontalKeyboard));
+    midi_keyboard_two_.reset(new juce::MidiKeyboardComponent(midi_keyboard_state_two_,
+                             juce::KeyboardComponentBase::Orientation::horizontalKeyboard));
+    addAndMakeVisible(midi_keyboard_one_.get());
+    addAndMakeVisible(midi_keyboard_two_.get());
 
     // Make sure you set the size of the component after
     // you add any child components.
-    setSize (800, 100);
+    setSize (800, 300);
 }
 
 MainComponent::~MainComponent()
@@ -56,7 +61,9 @@ void MainComponent::paint (juce::Graphics& g)
 
 void MainComponent::resized()
 {
-    midi_keyboard_->setBounds(getLocalBounds());
+    auto local_bounds = getLocalBounds();
+    midi_keyboard_one_->setBounds(local_bounds.removeFromTop(100));
+    midi_keyboard_two_->setBounds(local_bounds.removeFromTop(100));
 }
 
 void MainComponent::handleNoteOn(juce::MidiKeyboardState* source, int, int midiNoteNumber, float)
