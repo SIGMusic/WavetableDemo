@@ -32,7 +32,7 @@ public:
 
     static constexpr inline float midiToFreq(juce::uint8 midi_note)
     {
-        return 440.0 * std::powf(2.0, (midi_note - 69) / 12.0);
+        return 440.0 * std::pow(2.0, (midi_note - 69) / 12.0);
     }
 private:
     //==============================================================================
